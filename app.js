@@ -7,12 +7,29 @@ var bodyParser = require('body-parser');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
-
+var home = require('./routes/home');
+var uuidv1 = require('uuid/v1');
+var session = require('express-session');
 var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
+
+const sess = {
+    name: "oauth_session",
+    genid: function(req) {
+        return uuidv1(); // use unique id for sessions
+    },
+    secret: "Signed by yatin",
+    resave: true,
+    saveUninitialized: true,
+    rolling: true,
+    accessToken:"",
+    unset: "destroy"
+};
+
+app.use(session(sess));
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -22,24 +39,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Set the configuration settings
-const credentials = {
-    client: {
-        id: '<client-id>',
-        secret: '<client-secret>'
-    },
-    auth: {
-        tokenHost: 'https://github.com',
-        tokenPath: '/login/oauth/access_token',
-        authorizePath: '/login/oauth/authorize',
-    }
-};
-
-// Initialize the OAuth2 Library
-const oauth2 = require('simple-oauth2').create(credentials);
-
 app.use('/', index);
 app.use('/users', users);
+app.use('/home', home);
+
+
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
